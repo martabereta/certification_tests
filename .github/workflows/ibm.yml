@@ -20,6 +20,7 @@ on:
 env:
   #GITHUB_SHA: ${{ github.sha }}
   IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
+  IBM_CLOUD_PASSCODE: ${{ secrets.IBM_CLOUD_PASSCODE }}
   IBM_CLOUD_REGION: eu-de
   IKS_CLUSTER: mycluster-free
   DEPLOYMENT_NAME: iks-release
@@ -46,7 +47,8 @@ jobs:
     # Authenticate with IBM Cloud CLI
     - name: Authenticate with IBM Cloud CLI
       run: |
-        ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g default
+      #ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g default
+        ibmcloud login -a https://cloud.ibm.com -u passcode -p "${IBM_CLOUD_PASSCODE}"
         ibmcloud cr region-set "${IBM_CLOUD_REGION}"
         ibmcloud cr login
 
