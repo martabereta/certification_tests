@@ -55,8 +55,8 @@ jobs:
 
     - name: Create K8s
       run: |
-      #ibmcloud ks cluster ls | grep $IKS_CLUSTER
         ibmcloud ks cluster create classic --name $IKS_CLUSTER
+      #ibmcloud ks cluster ls | grep $IKS_CLUSTER
 
     # Build the Docker image
 #    - name: Build with Docker
