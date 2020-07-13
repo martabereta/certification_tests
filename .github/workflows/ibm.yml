@@ -56,7 +56,16 @@ jobs:
     - name: Create K8s
       run: |
         ibmcloud ks cluster create classic --name $IKS_CLUSTER
-        ibmcloud ks cluster ls | grep $IKS_CLUSTER
+        ibmcloud target -g default
+
+    - name: Check K8s
+      if: ibmcloud ks cluster get --cluster mycluster-free | grep ^State
+      #run: echo '::set-env name=SELECTED_COLOR::green'
+      #ibmcloud ks cluster ls | grep $IKS_CLUSTER
+      #if: ${{ success() }}
+      run: echo That is really great!
+
+    #- name: Verify K8s clustet
 
     # Build the Docker image
 #    - name: Build with Docker
