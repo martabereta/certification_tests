@@ -55,7 +55,7 @@ jobs:
 
     - name: Create K8s
       run: |
-        ibmcloud ks cluster create classic --name $IKS_CLUSTER
+        ibmcloud ks cluster create classic --name $IKS_CLUSTER -g $IBM_CLOUD_RESOURCE_GROUP
         ibmcloud target -g default
 
     - name: Check K8s
