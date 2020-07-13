@@ -59,13 +59,16 @@ jobs:
         ibmcloud target -g default
 
     - name: Check K8s
-      if:
-        ibmcloud ks cluster get --cluster mycluster-free | grep ^State
+      id: cluster_creation
+      run: echo "::set-output name=post_message::$(ibmcloud ks cluster get --cluster mycluster-free | grep ^State)"
       #run: echo '::set-env name=SELECTED_COLOR::green'
       #ibmcloud ks cluster ls | grep $IKS_CLUSTER
-      #if: ${{ success() }}
-      run:
-        echo That is really great!
+
+    - name: Verify K8s cluster
+      if: steps.cluster_creation.outputs.post_message == 'normal'
+      run: echo That is really great!
+
+
 
     #- name: Verify K8s clustet
 
