@@ -23,7 +23,12 @@ env:
 #IBM_CLOUD_PASSCODE: ${{ secrets.IBM_CLOUD_PASSCODE }}
   IBM_CLOUD_REGION: eu-de
   IBM_CLOUD_RESOURCE_GROUP: Default
-  IKS_CLUSTER: mycluster-free
+  IKS_CLUSTER_NAME: mycluster-ls3 #mycluster-vpc
+  IKS_CLUSTER_ZONE: dal10
+  IKS_CLUSTER_PRIVATE_VLAN: 2887074
+  IKS_CLUSTER_PUBLIC_VLAN: 2887072
+  IKS_CLUSTER_FLAVOR: b2c.4x16
+
   DEPLOYMENT_NAME: iks-release
   #PORT: 5001
 
@@ -56,12 +61,14 @@ jobs:
     - name: Create K8s
       run: |
         ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
-        ibmcloud ks cluster create classic --name $IKS_CLUSTER
+      #FREE ibmcloud ks cluster create classic --name $IKS_CLUSTER_NAME
+        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
 
 
     - name: Check K8s
       id: cluster_creation
-      run: echo "::set-output name=post_message::$(ibmcloud ks cluster get --cluster mycluster-free | grep ^State)"
+      run: check_cluster.sh
+      #echo '::set-output name=post_message::$(ibmcloud ks cluster get --cluster mycluster-free | grep ^State)'
       #run: echo '::set-env name=SELECTED_COLOR::green'
       #ibmcloud ks cluster ls | grep $IKS_CLUSTER
 
