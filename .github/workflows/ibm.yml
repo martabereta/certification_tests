@@ -67,10 +67,9 @@ jobs:
 
     - name: Check K8s
       id: cluster_creation
-      run: |
-        pwd
-        ls -la
-        ./scripts/check_cluster.sh
+      run: ./scripts/check_cluster.sh $IKS_CLUSTER_NAME
+      #pwd
+      #ls -la
       #echo '::set-output name=post_message::$(ibmcloud ks cluster get --cluster mycluster-free | grep ^State)'
       #run: echo '::set-env name=SELECTED_COLOR::green'
       #ibmcloud ks cluster ls | grep $IKS_CLUSTER

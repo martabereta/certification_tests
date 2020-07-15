@@ -1,3 +1,2 @@
 #!/bin/bash
-pwd
-ibmcloud ks cluster get --cluster mycluster-ls3 | grep ^State
+ibmcloud ks cluster get --cluster $1 | grep ^State
