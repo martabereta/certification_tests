@@ -65,13 +65,14 @@ jobs:
       id: cluster_creation
       run: ./scripts/check_cluster.sh $IKS_CLUSTER_NAME
 
-    - name: Verify K8s cluster
-      if: steps.cluster_creation.outputs.post_message == 'normal'
-      run: echo That is really great!
+#    - name: Verify K8s cluster
+#      if: steps.cluster_creation.outputs.post_message == 'normal'
+#      run: echo That is really great!
+
+    - name: Download LS repository
+      run: git clone https://github.com/IBM/ibm-licensing-operator.git
 
 
-
-    #- name: Verify K8s clustet
 
     # Build the Docker image
 #    - name: Build with Docker
