@@ -72,8 +72,12 @@ jobs:
     - name: Download LS repository
       run: git clone https://github.com/IBM/ibm-licensing-operator.git
 
-    - name: Verification of LS repository
-      run: ls -la
+    - name: kubectl installation
+      run: |
+        curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+        kubectl version --client
 
     - name: Instal License Service
       run:  ./ibm-licensing-operator/common/scripts/ibm_licensing_operator_install.sh
