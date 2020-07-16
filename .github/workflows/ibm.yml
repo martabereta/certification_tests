@@ -20,10 +20,9 @@ on:
 env:
   #GITHUB_SHA: ${{ github.sha }}
   IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
-#IBM_CLOUD_PASSCODE: ${{ secrets.IBM_CLOUD_PASSCODE }}
   IBM_CLOUD_REGION: eu-de
   IBM_CLOUD_RESOURCE_GROUP: Default
-  IKS_CLUSTER_NAME: mycluster-ls6 #mycluster-vpc
+  IKS_CLUSTER_NAME: mycluster-ls6
   IKS_CLUSTER_ZONE: dal10
   IKS_CLUSTER_PRIVATE_VLAN: 2887074
   IKS_CLUSTER_PUBLIC_VLAN: 2887072
@@ -38,41 +37,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - name: Checkout
-      uses: actions/checkout@v2
-
-    # Download and Install IBM Cloud CLI
-    - name: Install IBM Cloud CLI
-      run: |
-        curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
-        ibmcloud --version
-        ibmcloud config --check-version=false
-        ibmcloud plugin install -f kubernetes-service
-        ibmcloud plugin install -f container-registry
-
-    # Authenticate with IBM Cloud CLI
-    - name: Authenticate with IBM Cloud CLI
-      run: |
-        ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g "${IBM_CLOUD_RESOURCE_GROUP}"
-        ibmcloud cr region-set "${IBM_CLOUD_REGION}"
-        ibmcloud cr login
-      #ibmcloud login -a https://cloud.ibm.com -u passcode -p "${IBM_CLOUD_PASSCODE}"
-
-    - name: Create K8s
-      run: |
-        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
-        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
-      #FREE ibmcloud ks cluster create classic --name $IKS_CLUSTER_NAME
-
+#    - name: Checkout
+#      uses: actions/checkout@v2
+#
+#    # Download and Install IBM Cloud CLI
+#    - name: Install IBM Cloud CLI
+#      run: |
+#        curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+#        ibmcloud --version
+#        ibmcloud config --check-version=false
+#        ibmcloud plugin install -f kubernetes-service
+#        ibmcloud plugin install -f container-registry
+#
+#    # Authenticate with IBM Cloud CLI
+#    - name: Authenticate with IBM Cloud CLI
+#      run: |
+#        ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g "${IBM_CLOUD_RESOURCE_GROUP}"
+#        ibmcloud cr region-set "${IBM_CLOUD_REGION}"
+#        ibmcloud cr login
+#
+#    - name: Create K8s
+#      run: |
+#        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
+#        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
 
     - name: Check K8s
       id: cluster_creation
       run: ./scripts/check_cluster.sh $IKS_CLUSTER_NAME
-      #pwd
-      #ls -la
-      #echo '::set-output name=post_message::$(ibmcloud ks cluster get --cluster mycluster-free | grep ^State)'
-      #run: echo '::set-env name=SELECTED_COLOR::green'
-      #ibmcloud ks cluster ls | grep $IKS_CLUSTER
 
     - name: Verify K8s cluster
       if: steps.cluster_creation.outputs.post_message == 'normal'
