@@ -73,10 +73,7 @@ jobs:
       run: git clone https://github.com/IBM/ibm-licensing-operator.git
 
     - name: Verification of LS repository
-      run: |
-        ls -la
-        cd /
-        du .
+      run: ls -la
 
     - name: Instal License Service
       run:  ./ibm-licensing-operator/common/scripts/ibm_licensing_operator_install.sh
