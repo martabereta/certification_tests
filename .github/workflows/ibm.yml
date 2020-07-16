@@ -69,8 +69,11 @@ jobs:
 #      if: steps.cluster_creation.outputs.post_message == 'normal'
 #      run: echo That is really great!
 
-    - name: Download LS repository
-      run: git clone https://github.com/IBM/ibm-licensing-operator.git
+#    - name: Download LS repository
+#      run: git clone https://github.com/IBM/ibm-licensing-operator.git
+
+    - name: Verification of LS repository
+      run: ls -la
 
 
 
