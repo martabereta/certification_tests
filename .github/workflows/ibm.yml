@@ -73,7 +73,10 @@ jobs:
 #      run: git clone https://github.com/IBM/ibm-licensing-operator.git
 
     - name: Verification of LS repository
-      run: ls -la
+      run: |
+        ls -la
+        cd .github
+        ls -la
 
 
 
