@@ -56,10 +56,10 @@ jobs:
         ibmcloud cr region-set "${IBM_CLOUD_REGION}"
         ibmcloud cr login
 
-    - name: Create K8s
-      run: |
-        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
-        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
+#    - name: Create K8s
+#      run: |
+#        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
+#        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
 
     - name: Check K8s
       id: cluster_creation
@@ -69,8 +69,8 @@ jobs:
 #      if: steps.cluster_creation.outputs.post_message == 'normal'
 #      run: echo That is really great!
 
-#    - name: Download LS repository
-#      run: git clone https://github.com/IBM/ibm-licensing-operator.git
+    - name: Download LS repository
+      run: git clone https://github.com/IBM/ibm-licensing-operator.git
 
     - name: Verification of LS repository
       run: |
