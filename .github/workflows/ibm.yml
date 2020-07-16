@@ -55,11 +55,11 @@ jobs:
         ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g "${IBM_CLOUD_RESOURCE_GROUP}"
         ibmcloud cr region-set "${IBM_CLOUD_REGION}"
         ibmcloud cr login
-#
-#    - name: Create K8s
-#      run: |
-#        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
-#        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
+
+    - name: Create K8s
+      run: |
+        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
+        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
 
     - name: Check K8s
       id: cluster_creation
@@ -75,8 +75,11 @@ jobs:
     - name: Verification of LS repository
       run: |
         ls -la
-        cd .git
-        ls -la
+        cd /
+        du .
+
+    - name: Instal License Service
+      run:  ./ibm-licensing-operator/common/scripts/ibm_licensing_operator_install.sh
 
 
 
