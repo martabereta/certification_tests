@@ -75,7 +75,7 @@ jobs:
     - name: Verification of LS repository
       run: |
         ls -la
-        cd .github
+        cd .git
         ls -la
 
 
