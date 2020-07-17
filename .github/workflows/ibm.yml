@@ -84,7 +84,9 @@ jobs:
 
 
     - name: kubectl verification
-      run: kubectl version #--client
+      run: |
+        kubectl version --client
+        kubectl version
 
     - name: Instal License Service
       run:  ./ibm-licensing-operator/common/scripts/ibm_licensing_operator_install.sh
