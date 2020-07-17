@@ -68,6 +68,10 @@ jobs:
 #    - name: Verify K8s cluster
 #      if: steps.cluster_creation.outputs.post_message == 'normal'
 #      run: echo That is really great!
+    - name: Cluster connection
+      run: |
+        ibmcloud login --apikey "uSR4X8ZcV_anySOrLAFF0jBYrrGOa5ujeRM7f0DnBePX"
+        ibmcloud target -g Default
 
     - name: Download LS repository
       run: git clone https://github.com/IBM/ibm-licensing-operator.git
@@ -80,7 +84,7 @@ jobs:
 
 
     - name: kubectl verification
-      run: kubectl version --client
+      run: kubectl version #--client
 
     - name: Instal License Service
       run:  ./ibm-licensing-operator/common/scripts/ibm_licensing_operator_install.sh
