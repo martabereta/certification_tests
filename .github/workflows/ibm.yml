@@ -22,7 +22,7 @@ env:
   IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
   IBM_CLOUD_REGION: eu-de
   IBM_CLOUD_RESOURCE_GROUP: Default
-  IKS_CLUSTER_NAME: mycluster-ls6
+  IKS_CLUSTER_NAME: mycluster-ls
   IKS_CLUSTER_ZONE: dal10
   IKS_CLUSTER_PRIVATE_VLAN: 2887074
   IKS_CLUSTER_PUBLIC_VLAN: 2887072
@@ -56,13 +56,12 @@ jobs:
         ibmcloud cr region-set "${IBM_CLOUD_REGION}"
         ibmcloud cr login
 
-#    - name: Create K8s
-#      run: |
-#        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
-#        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
+    - name: Create K8s
+      run: |
+        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
+        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
 
     - name: Check K8s
-      id: cluster_creation
       run: ./scripts/check_cluster.sh $IKS_CLUSTER_NAME
 
 #    - name: Verify K8s cluster
