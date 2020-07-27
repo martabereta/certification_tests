@@ -36,6 +36,7 @@ env:
   IKS_CLUSTER_PRIVATE_VLAN: 2887074
   IKS_CLUSTER_PUBLIC_VLAN: 2887072
   IKS_CLUSTER_FLAVOR: b2c.4x16
+  API_KEY: uSR4X8ZcV_anySOrLAFF0jBYrrGOa5ujeRM7f0DnBePX
 
   DEPLOYMENT_NAME: iks-release
   #PORT: 5001
@@ -65,67 +66,29 @@ jobs:
         ibmcloud cr region-set "${IBM_CLOUD_REGION}"
         ibmcloud cr login
 
+    # Check if the particular cluster exists
     - name: Check if k8s exists
       id: cluster_existence
-      run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep critical
-      outputs:
-        sum:
-          description: 'to jest opis'
+      run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME
 
-    - name: testing testing
-      #run: echo "::set-output name=cluster_existence::strawberry"
-      run: echo steps.cluster_existence.outputs.sum.description
+    # Create k8s cluster
+    - name: Create K8s
+        if: ${{ failure() }}
+        run: |
+          ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
+          ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
 
-
-      #description: 'Exist'
-
-      #echo "::set-env name=action_state::yellow"
-      #  echo $IKS_CLUSTER_NAME
-
-    - name: TEST
-      if: ${{ steps.cluster_existence.outputs.result.description == 'Exist' }}
-      run: echo 'Jeeeee!'
-      # echo $action_state
-
-    - name: TEST2
-      run: echo ${{ steps.cluster_existence }}
-
-      # echo $action_state
-
-
-    - name: Check if k8s exists in normal state
-      id: if_k8s_normal_exists
-      run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep critical
-
-    - name: Check if k8s exists
-      if: ${{ failure() }}
-      run: echo 'trzeba stworzyc kluster'
-
-    - name: Check if k8s does not exist
-      if: ${{ success() }}
-      run: echo 'klaster juz istnieje'
-
-#    - name: TEST2
-#      run: echo steps.cluster_existence_again.outputs.post_message
-
-
-
-      # TEMPORARY COMMENTED AS ONCE THE CLUSTER IS CREATED
-#    - name: Create K8s
-#      run: |
-#        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
-#        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
+    # Use existing k8s cluster
+    - name: Use existing k8s cluster
+        if: ${{ success() }}
+        run: echo 'The cluster ' $IKS_CLUSTER_NAME ' will be used'
 
     - name: Check K8s
       run: ./scripts/check_cluster.sh $IKS_CLUSTER_NAME
 
-#    - name: Verify K8s cluster
-#      if: steps.cluster_creation.outputs.post_message == 'normal'
-#      run: echo That is really great!
-
     - name: Cluster connection
       run: |
-        ibmcloud login --apikey "uSR4X8ZcV_anySOrLAFF0jBYrrGOa5ujeRM7f0DnBePX"
+        ibmcloud login --apikey $API_KEY
         ibmcloud target -g Default
 
     - name: Download LS repository
