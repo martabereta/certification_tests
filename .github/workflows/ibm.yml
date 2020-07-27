@@ -84,7 +84,7 @@ jobs:
       run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep normal
 
     - name: Check if k8s exists
-      if: ${{  == failure() }}
+      if: ${{ failure() }}
       run: echo 'trzeba stworzyc kluster'
 
 #    - name: TEST2
