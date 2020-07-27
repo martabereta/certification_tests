@@ -79,8 +79,12 @@ jobs:
       run: echo 'Jeeeee!'
       # echo $action_state
 
+    - name: Check if k8s exists in normal state
+      id: if_k8s_normal_exists
+      run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep normal
+
     - name: Check if k8s exists
-      if: ${{ ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep normal == failure() }}
+      if: ${{  == failure() }}
       run: echo 'trzeba stworzyc kluster'
 
 #    - name: TEST2
