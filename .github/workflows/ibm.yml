@@ -68,9 +68,14 @@ jobs:
     - name: Check if k8s exists
       id: cluster_existence
       run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep critical
+      outputs:
+        sum:
+          description: 'to jest opis'
 
     - name: testing testing
-      run: echo "::set-output name=cluster_existence::strawberry"
+      #run: echo "::set-output name=cluster_existence::strawberry"
+      run: echo steps.cluster_existence.outputs.sum.description
+
 
       #description: 'Exist'
 
