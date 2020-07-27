@@ -83,7 +83,7 @@ jobs:
       # echo $action_state
 
     - name: TEST2
-      run: echo ${{ steps.cluster_existence.outputs.result.description }}
+      run: echo ${{ steps.cluster_existence.outputs }}
 
       # echo $action_state
 
