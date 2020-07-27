@@ -1,10 +1,19 @@
-# This workflow will build a docker container, publish it to IBM Container Registry, and deploy it to IKS when a release is created
+# This workflow will build a kuberneties cluster, deploy License Service instance
+# and run certification tests to confirm basic functionality
 #
 # To configure this workflow:
 #
 # 1. Ensure that your repository contains a Dockerfile
 # 2. Setup secrets in your repository by going to settings: Create ICR_NAMESPACE and IBM_CLOUD_API_KEY
-# 3. Change the values for the IBM_CLOUD_REGION, REGISTRY_HOSTNAME, IMAGE_NAME, IKS_CLUSTER, DEPLOYMENT_NAME, and PORT
+# 3. Change the values for the following variables
+#  IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
+#  IBM_CLOUD_REGION: eu-de
+#  IBM_CLOUD_RESOURCE_GROUP: Default
+#  IKS_CLUSTER_NAME: mycluster-ls
+#  IKS_CLUSTER_ZONE: dal10
+#  IKS_CLUSTER_PRIVATE_VLAN: 2887074
+#  IKS_CLUSTER_PUBLIC_VLAN: 2887072
+#  IKS_CLUSTER_FLAVOR: b2c.4x16
 
 name: Build and Deploy to IKS
 
@@ -22,7 +31,8 @@ env:
   IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
   IBM_CLOUD_REGION: eu-de
   IBM_CLOUD_RESOURCE_GROUP: Default
-  IKS_CLUSTER_NAME: mycluster-ls
+  IKS_CLUSTER_NAME: ibmcloud ks cluster config --cluster mycluster-lspwd
+
   IKS_CLUSTER_ZONE: dal10
   IKS_CLUSTER_PRIVATE_VLAN: 2887074
   IKS_CLUSTER_PUBLIC_VLAN: 2887072
@@ -56,10 +66,31 @@ jobs:
         ibmcloud cr region-set "${IBM_CLOUD_REGION}"
         ibmcloud cr login
 
-    - name: Create K8s
+    - name: Check if k8s exists
+      id: cluster_existence
       run: |
-        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
-        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
+        ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep normal
+
+    - name: TEST
+      run:
+        echo steps.cluster_existence.outputs.post_message
+
+    - name: Check if k8s exists
+        id: cluster_existence2
+        run: |
+          ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep critical
+
+    - name: TEST2
+        run:
+          echo steps.cluster_existence2.outputs.post_message
+
+
+
+      # TEMPORARY COMMENTED AS ONCE THE CLUSTER IS CREATED
+#    - name: Create K8s
+#      run: |
+#        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
+#        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
 
     - name: Check K8s
       run: ./scripts/check_cluster.sh $IKS_CLUSTER_NAME
@@ -67,6 +98,7 @@ jobs:
 #    - name: Verify K8s cluster
 #      if: steps.cluster_creation.outputs.post_message == 'normal'
 #      run: echo That is really great!
+
     - name: Cluster connection
       run: |
         ibmcloud login --apikey "uSR4X8ZcV_anySOrLAFF0jBYrrGOa5ujeRM7f0DnBePX"
@@ -83,7 +115,6 @@ jobs:
         ibmcloud ks cluster config --cluster $IKS_CLUSTER_NAME
         kubectl config current-context
 
-
 #    - name: kubectl verification TO REMOVE
 #      run: |
 #        kubectl version --client
@@ -92,8 +123,6 @@ jobs:
 
     - name: Instal License Service
       run:  ./ibm-licensing-operator/common/scripts/ibm_licensing_operator_install.sh --olm_global_catalog_namespace ibm-common-services
-
-
 
     # Build the Docker image
 #    - name: Build with Docker
