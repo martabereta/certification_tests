@@ -70,7 +70,7 @@ jobs:
       run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep critical
 
     - name: testing testing
-      run: echo "::set-output name=action_fruit::strawberry"
+      run: echo "::set-output name=cluster_existence::strawberry"
 
       #description: 'Exist'
 
@@ -81,6 +81,12 @@ jobs:
       if: ${{ steps.cluster_existence.outputs.result.description == 'Exist' }}
       run: echo 'Jeeeee!'
       # echo $action_state
+
+    - name: TEST2
+      run: echo ${{ steps.cluster_existence.outputs.result.description }}
+
+      # echo $action_state
+
 
     - name: Check if k8s exists in normal state
       id: if_k8s_normal_exists
