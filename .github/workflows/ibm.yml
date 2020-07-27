@@ -69,11 +69,14 @@ jobs:
     - name: Check if k8s exists
       id: cluster_existence
       run: |
+        echo "::set-env name=action_state::yellow"
         echo $IKS_CLUSTER_NAME
         ibmcloud ks cluster ls
 
     - name: TEST
-      run: echo steps.cluster_existence.outputs.post_message
+      run: |
+        echo $(steps.cluster_existence.outputs.post_message)
+        echo $action_state
 
     - name: Check if k8s exists
       id: cluster_existence_again
