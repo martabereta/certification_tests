@@ -96,6 +96,10 @@ jobs:
       if: ${{ failure() }}
       run: echo 'trzeba stworzyc kluster'
 
+    - name: Check if k8s does not exist
+      if: ${{ success() }}
+      run: echo 'klaster juz istnieje'
+
 #    - name: TEST2
 #      run: echo steps.cluster_existence_again.outputs.post_message
 
