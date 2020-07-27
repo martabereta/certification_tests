@@ -69,13 +69,14 @@ jobs:
       id: cluster_existence
       run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep critical
       outputs:
-        post_message: 'Exist'
+        result:
+          description: 'Exist'
 
       #echo "::set-env name=action_state::yellow"
       #  echo $IKS_CLUSTER_NAME
 
     - name: TEST
-      if: ${{ steps.cluster_existence.outputs.post_message == 'Exist' }}
+      if: ${{ steps.cluster_existence.outputs.result.description == 'Exist' }}
       run: echo 'Jeeeee!'
       # echo $action_state
 
