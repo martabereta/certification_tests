@@ -70,7 +70,7 @@ jobs:
       id: cluster_existence
       run: |
         echo $IKS_CLUSTER_NAME
-        ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep normal
+        ibmcloud ks cluster ls
 
     - name: TEST
       run: echo steps.cluster_existence.outputs.post_message
