@@ -68,7 +68,11 @@ jobs:
     - name: Check if k8s exists
       id: cluster_existence
       run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep critical
-      description: 'Exist'
+
+    - name: testing testing
+      run: echo "::set-output name=action_fruit::strawberry"
+
+      #description: 'Exist'
 
       #echo "::set-env name=action_state::yellow"
       #  echo $IKS_CLUSTER_NAME
