@@ -68,20 +68,23 @@ jobs:
     - name: Check if k8s exists
       id: cluster_existence
       run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep critical
+      outputs:
+        post_message: 'Exist'
 
       #echo "::set-env name=action_state::yellow"
       #  echo $IKS_CLUSTER_NAME
 
     - name: TEST
-      run: echo $(steps.cluster_existence.outputs.post_message)
+      if: ${{ steps.cluster_existence.outputs.post_message == 'Exist' }}
+      run: echo 'Jeeeee!'
       # echo $action_state
 
     - name: Check if k8s exists
-      id: cluster_existence_again
-      run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep critical
+      if: ${{ failure( ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep normal) }}
+      run: echo 'trzeba stworzyc kluster'
 
-    - name: TEST2
-      run: echo steps.cluster_existence_again.outputs.post_message
+#    - name: TEST2
+#      run: echo steps.cluster_existence_again.outputs.post_message
 
 
 
