@@ -68,7 +68,8 @@ jobs:
 
     - name: Check if k8s exists
       id: cluster_existence
-      run:
+      run: |
+        echo $IKS_CLUSTER_NAME
         ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep normal
 
     - name: TEST
@@ -76,8 +77,7 @@ jobs:
 
     - name: Check if k8s exists
       id: cluster_existence_again
-      run:
-        ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep critical
+      run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME | grep critical
 
     - name: TEST2
       run: echo steps.cluster_existence_again.outputs.post_message
