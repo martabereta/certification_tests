@@ -75,7 +75,7 @@ jobs:
     # Check if the particular cluster exists
     - name: Check if k8s exists
       id: cluster_existence
-      run: ibmcloud ks cluster ls | grep $IKS_CLUSTER_NAME + ' '
+      run: ibmcloud ks cluster ls | grep -e $IKS_CLUSTER_NAME[[:space:]]
 
     # Create k8s cluster
     - name: Create K8s
