@@ -90,10 +90,10 @@ jobs:
       run: |
         ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
         ibmcloud ks cluster create classic --name $IKS_CLUSTER_NAME --zone $IKS_CLUSTER_ZONE --flavor $IKS_CLUSTER_FLAVOR --hardware shared --workers 1 --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --private-vlan $IKS_CLUSTER_PRIVATE_VLAN
-      # ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
         ibmcloud resource tag-attach --resource-name $IKS_CLUSTER_NAME --tag-names $IKS_CLUSTER_TAG_NAMES
+      # ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
 
-    # Use existing k8s cluster
+      # Use existing k8s cluster
     - name: Use existing k8s cluster
       if: ${{ success() }}
       run: echo 'The cluster ' $IKS_CLUSTER_NAME ' will be used'
