@@ -31,12 +31,25 @@ env:
   IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
   IBM_CLOUD_REGION: eu-de
   IBM_CLOUD_RESOURCE_GROUP: Default
-  IKS_CLUSTER_NAME: mycluster-ls2
+  IKS_CLUSTER_NAME: mycluster-ls
   IKS_CLUSTER_ZONE: dal10
   IKS_CLUSTER_PRIVATE_VLAN: 2887074
   IKS_CLUSTER_PUBLIC_VLAN: 2887072
-  IKS_CLUSTER_FLAVOR: b2c.4x16
-  API_KEY: uSR4X8ZcV_anySOrLAFF0jBYrrGOa5ujeRM7f0DnBePX
+  #IKS_CLUSTER_FLAVOR: b2c.4x16
+  IKS_CLUSTER_FLAVOR: u3c.2x4
+  IKS_CLUSTER_API_KEY: ${{ secrets.IKS_CLUSTER_API_KEY }}
+  IKS_CLUSTER_TAG_NAMES: owner:marta.bereta,team:CP4MCM,Usage:temp,Usage_desc:'Certification tests',Review_freq:month
+
+#  IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
+#  IBM_CLOUD_REGION: eu-de
+#  IBM_CLOUD_RESOURCE_GROUP: Default
+#  IKS_CLUSTER_NAME: mycluster-ls
+#  IKS_CLUSTER_ZONE: fra02
+#  IKS_CLUSTER_PRIVATE_VLAN: 2887074
+#  IKS_CLUSTER_PUBLIC_VLAN: 2887072
+#  IKS_CLUSTER_FLAVOR: u3c.2x4
+#  IKS_CLUSTER_API_KEY: ${{ secrets.IKS_CLUSTER_API_KEY }}
+#  IKS_CLUSTER_TAG_NAMES: owner:marta.bereta,team:CP4MCM,Usage:temp,Usage_desc:'Certification tests',Review_freq:month
 
   DEPLOYMENT_NAME: iks-release
   #PORT: 5001
@@ -76,7 +89,9 @@ jobs:
       if: ${{ failure() }}
       run: |
         ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
-        ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
+        ibmcloud ks cluster create classic --name $IKS_CLUSTER_NAME --zone $IKS_CLUSTER_ZONE --flavor $IKS_CLUSTER_FLAVOR --hardware shared --workers 1 --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --private-vlan $IKS_CLUSTER_PRIVATE_VLAN
+      # ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
+        ibmcloud resource tag-attach --resource-name $IKS_CLUSTER_NAME --tag-names $IKS_CLUSTER_TAG_NAMES
 
     # Use existing k8s cluster
     - name: Use existing k8s cluster
@@ -88,7 +103,7 @@ jobs:
 
     - name: Cluster connection
       run: |
-        ibmcloud login --apikey $API_KEY
+        ibmcloud login --apikey $IKS_CLUSTER_API_KEY
         ibmcloud target -g Default
 
     - name: Download LS repository
