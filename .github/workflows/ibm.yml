@@ -110,17 +110,30 @@ jobs:
         ibmcloud ks cluster config --cluster $IKS_CLUSTER_NAME
         kubectl config current-context
 
-#    - name: kubectl verification TO REMOVE
-#      run: |
-#        kubectl version --client
-#        kubectl version
-#        kubectl cluster-info
-
-    - name: Instal License Service
+    - name: Install License Service
       run:  ./ibm-licensing-operator/common/scripts/ibm_licensing_operator_install.sh --olm_global_catalog_namespace ibm-common-services
 
+    - name: Download Common Services Sanity Tests repository
+      run: git clone https://github.ibm.com/IBMPrivateCloud/common-svcs-sert-tests
+
+    - name: Configure
+      run: |
+        ibmcloud login --apikey "uSR4X8ZcV_anySOrLAFF0jBYrrGOa5ujeRM7f0DnBeP
+
+    - name: Install BATS (for tests purpose)
+      run: |
+        git clone https://github.com/bats-core/bats-core.git
+        cd bats-core
+        ./install.sh /usr/local
+
+    - name: Configure tests
+      run: |
+        export OC=kubectl
+
+
+
     # Build the Docker image
-#    - name: Build with Docker
+#    - name: Build with Dockerfvfdv
 #      run: |
 #        docker build -t "$REGISTRY_HOSTNAME"/"$ICR_NAMESPACE"/"$IMAGE_NAME":"$GITHUB_SHA" \
 #          --build-arg GITHUB_SHA="$GITHUB_SHA" \
