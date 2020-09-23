@@ -1,0 +1,62 @@
+# This workflow will build a kuberneties cluster, deploy License Service instance
+# and run certification tests to confirm basic functionality
+#
+# To configure this workflow:
+#
+# 1. Ensure that your repository contains a Dockerfile
+# 2. Setup secrets in your repository by going to Settings | Secrets: IBM_CLOUD_API_KEY and IKS_CLUSTER_API_KEY
+# 3. Change the values for the env variables
+
+
+name: Build and Deploy to IKS
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+  release:
+    types: [created]
+
+# Environment variables available to all jobs and steps in this workflow
+env:
+  IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
+  CLUSTER: btkqh3id0rrssmq3v6kg
+
+jobs:
+  setup-build-publish-deploy:
+    name: Setup, Build, Publish, and Deploy
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Download and Install IBM Cloud CLI
+    - name: Install IBM Cloud CLI
+      run: |
+        curl -sL https://ibm.biz/idt-installer | bash
+
+    # Authenticate with IBM Cloud CLI
+    - name: Authenticate with IBM Cloud CLI
+      run: |
+        ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "eu-de" -g "Default"
+        ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g "${IBM_CLOUD_RESOURCE_GROUP}"
+        ibmcloud cr region-set "${IBM_CLOUD_REGION}"
+        ibmcloud cr login
+
+    - name: Download LS repository
+      run: git clone https://github.com/IBM/ibm-licensing-operator.git
+
+    - name: kubectl installation and configuration
+      run: |
+        curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+        ibmcloud ks cluster config --cluster "${CLUSTER}"
+        kubectl config current-context
+
+    - name: Install License Service
+      run:  ./ibm-licensing-operator/common/scripts/ibm_licensing_operator_install.sh --olm_global_catalog_namespace ibm-common-services
+
+
