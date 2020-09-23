@@ -8,7 +8,7 @@
 # 3. Change the values for the env variables
 
 
-name: Build and Deploy to IKS
+name: LS installation on IKS
 
 on:
   push:
