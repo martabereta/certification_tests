@@ -21,7 +21,8 @@ on:
 # Environment variables available to all jobs and steps in this workflow
 env:
   IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
-  CLUSTER: btkqh3id0rrssmq3v6kg
+  CLUSTER: btm52jsd0kb530cveglg #btkqh3id0rrssmq3v6kg
+
 
 jobs:
   setup-build-publish-deploy:
@@ -34,15 +35,11 @@ jobs:
 
     # Download and Install IBM Cloud CLI
     - name: Install IBM Cloud CLI
-      run: |
-        curl -sL https://ibm.biz/idt-installer | bash
+      run: curl -sL https://ibm.biz/idt-installer | bash
 
     # Authenticate with IBM Cloud CLI
     - name: Authenticate with IBM Cloud CLI
       run: ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "eu-de" -g "Default"
-
-    - name: Download LS repository
-      run: git clone https://github.com/IBM/ibm-licensing-operator.git
 
     - name: kubectl installation and configuration
       run: |
@@ -52,7 +49,11 @@ jobs:
         ibmcloud ks cluster config --cluster "${CLUSTER}"
         kubectl config current-context
 
+    - name: Download LS repository
+      run: git clone https://github.com/IBM/ibm-licensing-operator.git
+
     - name: Install License Service
-      run:  ./ibm-licensing-operator/common/scripts/ibm_licensing_operator_install.sh --olm_global_catalog_namespace ibm-common-services
+      run: ./scripts/ibm_licensing_operator_install.sh --olm_global_catalog_namespace ibm-common-services
+      #run:  ./ibm-licensing-operator/common/scripts/ibm_licensing_operator_install.sh --olm_global_catalog_namespace ibm-common-services
 
 
