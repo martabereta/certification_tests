@@ -1,19 +1,16 @@
-# This workflow will build a kuberneties cluster, deploy License Service instance
+# This workflow will build a kubernetes cluster, deploy License Service instance
 # and run certification tests to confirm basic functionality
 #
 # To configure this workflow:
 #
-# 1. Ensure that your repository contains a Dockerfile
-# 2. Setup secrets in your repository by going to Settings | Secrets: IBM_CLOUD_API_KEY and IKS_CLUSTER_API_KEY
-# 3. Change the values for the env variables
+# 1. Setup secrets in your repository by going to Settings | Secrets: IBM_CLOUD_API_KEY and ICR_NAMESPACE
+# 2. Change the values for the env variables
 
 
-name: LS installation on IKS
+name: Deploy and Test LS on IKS
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
     branches: [ master ]
   release:
     types: [created]
@@ -21,12 +18,22 @@ on:
 # Environment variables available to all jobs and steps in this workflow
 env:
   IBM_CLOUD_API_KEY: ${{ secrets.IBM_CLOUD_API_KEY }}
-  CLUSTER: btm52jsd0kb530cveglg #btkqh3id0rrssmq3v6kg
+  IBM_CLOUD_REGION: eu-de
+  IBM_CLOUD_RESOURCE_GROUP: Default
+  ICR_NAMESPACE: ${{ secrets.ICR_NAMESPACE }}
+  IKS_CLUSTER: iks-cluster-ls-1.2.2
+  IKS_CLUSTER_ZONE: dal10
+  IKS_CLUSTER_FLAVOR: u3c.2x4
+  IKS_CLUSTER_PRIVATE_VLAN: 2887074
+  IKS_CLUSTER_PUBLIC_VLAN: 2887072
+  IKS_CLUSTER_TAG_NAMES: owner:marta.bereta, team:CP4MCM, Usage:temp, Usage_desc:Certification tests, Review_freq:month
+
+  #CLUSTER: btm52jsd0kb530cveglg #btkqh3id0rrssmq3v6kg
 
 
 jobs:
   setup-build-publish-deploy:
-    name: Setup, Build, Publish, and Deploy
+    name: Setup and Deploy
     runs-on: ubuntu-latest
     steps:
 
@@ -35,18 +42,49 @@ jobs:
 
     # Download and Install IBM Cloud CLI
     - name: Install IBM Cloud CLI
-      run: curl -sL https://ibm.biz/idt-installer | bash
+      run: |
+        curl -fsSL https://clis.cloud.ibm.com/install/linux | sh
+        ibmcloud --version
+        ibmcloud config --check-version=false
+        ibmcloud plugin install -f kubernetes-service
+        ibmcloud plugin install -f container-registry
+      #or  curl -sL https://ibm.biz/idt-installer | bash
 
     # Authenticate with IBM Cloud CLI
     - name: Authenticate with IBM Cloud CLI
-      run: ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "eu-de" -g "Default"
+      run: |
+        ibmcloud login --apikey "${IBM_CLOUD_API_KEY}" -r "${IBM_CLOUD_REGION}" -g "${IBM_CLOUD_RESOURCE_GROUP}"
+        ibmcloud target -g $IBM_CLOUD_RESOURCE_GROUP
+        ibmcloud cr region-set "${IBM_CLOUD_REGION}"
+        ibmcloud cr login
+
+    # Check if the particular cluster exists
+    - name: Check if k8s exists
+      id: cluster_existence
+      run: ibmcloud ks cluster ls | grep -e $IKS_CLUSTER[[:space:]]
+
+    # Create k8s cluster
+    - name: Create K8s
+      if: ${{ failure() }}
+      run: |
+        ibmcloud ks cluster create classic --name $IKS_CLUSTER --zone $IKS_CLUSTER_ZONE --flavor $IKS_CLUSTER_FLAVOR --hardware shared --workers 1 --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --private-vlan $IKS_CLUSTER_PRIVATE_VLAN
+        ibmcloud resource tag-attach --resource-name $IKS_CLUSTER --tag-names $IKS_CLUSTER_TAG_NAMES
+      # ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
+
+    # Use existing k8s cluster
+    - name: Use existing k8s cluster
+      if: ${{ success() }}
+      run: echo 'The cluster ' $IKS_CLUSTER ' will be used'
+
+    - name: Check if k8s cluster is ready to use
+      run: ./scripts/check_cluster.sh $IKS_CLUSTER
 
     - name: kubectl installation and configuration
       run: |
         curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
         chmod +x ./kubectl
         sudo mv ./kubectl /usr/local/bin/kubectl
-        ibmcloud ks cluster config --cluster "${CLUSTER}"
+        ibmcloud ks cluster config --cluster $IKS_CLUSTER
         kubectl config current-context
 
     - name: Download LS repository
@@ -56,4 +94,24 @@ jobs:
       run: ./scripts/ibm_licensing_operator_install.sh --olm_global_catalog_namespace ibm-common-services
       #run:  ./ibm-licensing-operator/common/scripts/ibm_licensing_operator_install.sh --olm_global_catalog_namespace ibm-common-services
 
+    # install and setup ingress
+    - name: Post Installation Steps
+      run: |
+        kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.35.0/deploy/static/provider/cloud/deploy.yaml
+        cat <<EOF | kubectl apply -f -
+        apiVersion: operator.ibm.com/v1alpha1
+        kind: IBMLicensing
+        metadata:
+          name: instance
+        spec:
+          apiSecretToken: ibm-licensing-token
+          datasource: datacollector
+          httpsEnable: false
+          instanceNamespace: ibm-common-services
+          ingressEnabled: true
+          ingressOptions:
+            annotations:
+              "nginx.ingress.kubernetes.io/rewrite-target": "/\$2"
+            path: /ibm-licensing-service-instance(/|$)(.*)
+        EOF
 
