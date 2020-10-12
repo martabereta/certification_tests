@@ -21,7 +21,7 @@ env:
   IBM_CLOUD_REGION: eu-de
   IBM_CLOUD_RESOURCE_GROUP: Default
   ICR_NAMESPACE: ${{ secrets.ICR_NAMESPACE }}
-  IKS_CLUSTER: licensing-iks-cluster-ls-1.2.2
+  IKS_CLUSTER: ls-iks-cluster-ls-1.2.2
   IKS_CLUSTER_ZONE: dal10
   IKS_CLUSTER_FLAVOR: u3c.2x4
   IKS_CLUSTER_PRIVATE_VLAN: 2918270
@@ -72,7 +72,7 @@ jobs:
 
     # Use existing k8s cluster
     - name: Use existing k8s cluster
-      if: ${{ success() }}
+      #if: ${{ success() }}
       run: echo 'The cluster ' $IKS_CLUSTER ' will be used'
 
     - name: Check if k8s cluster is ready to use
