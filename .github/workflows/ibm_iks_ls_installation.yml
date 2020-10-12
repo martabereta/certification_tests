@@ -21,7 +21,7 @@ env:
   IBM_CLOUD_REGION: eu-de
   IBM_CLOUD_RESOURCE_GROUP: Default
   ICR_NAMESPACE: ${{ secrets.ICR_NAMESPACE }}
-  IKS_CLUSTER: iks-cluster-ls-1.2.2
+  IKS_CLUSTER: licensing-iks-cluster-ls-1.2.2
   IKS_CLUSTER_ZONE: dal10
   IKS_CLUSTER_FLAVOR: u3c.2x4
   IKS_CLUSTER_PRIVATE_VLAN: 2918270
@@ -68,7 +68,6 @@ jobs:
       if: ${{ failure() }}
       run: |
         ibmcloud ks cluster create classic --name $IKS_CLUSTER --zone $IKS_CLUSTER_ZONE --flavor $IKS_CLUSTER_FLAVOR --hardware shared --workers 1 --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --private-vlan $IKS_CLUSTER_PRIVATE_VLAN
-        ibmcloud resource tag-attach --resource-name $IKS_CLUSTER --tag-names $IKS_CLUSTER_TAG_NAMES
       # ibmcloud ks cluster create classic --zone $IKS_CLUSTER_ZONE --private-vlan $IKS_CLUSTER_PRIVATE_VLAN --public-vlan $IKS_CLUSTER_PUBLIC_VLAN --flavor $IKS_CLUSTER_FLAVOR --name $IKS_CLUSTER_NAME --hardware shared --workers 2
 
     # Use existing k8s cluster
@@ -86,6 +85,8 @@ jobs:
         sudo mv ./kubectl /usr/local/bin/kubectl
         ibmcloud ks cluster config --cluster $IKS_CLUSTER
         kubectl config current-context
+        ibmcloud resource tag-attach --resource-name $IKS_CLUSTER --tag-names $IKS_CLUSTER_TAG_NAMES
+
 
     - name: Download LS repository
       run: git clone https://github.com/IBM/ibm-licensing-operator.git
